@@ -1,0 +1,25 @@
+{
+    "working_dir": "/mnt/home/atanelus/ceph/speaker_ssl/gerbil_dyad",
+    "recording_session_dirs": [
+        "/mnt/home/rpeterson/ceph/ssl/new_dyads/"
+    ],
+    "audio_sr": 125000,
+    "video_framerate": 30,
+    "processed_track_dir": "processed_tracks",
+    "track_annotation_path": "manually_annotated_tracks.csv",
+    "processed_annotation_dir": "filtered_annotations",
+    "corner_points": [
+        [584, 391],
+        [94, 400],
+        [73, 80],
+        [588, 73]
+    ],
+    "arena_dims_mm": [572.0, 360.0],
+    "video_dims": [640, 512],
+    "min_vox_len_ms": 10,
+    "max_vox_len_ms": 250,
+    "vox_buffer_left_ms": 5,
+    "vox_buffer_right_ms": 5,
+    "full_dataset_path": "/mnt/home/atanelus/ceph/datasets/gerbil_dyad.h5",
+    "full_metadata_path": "/mnt/home/atanelus/ceph/datasets/gerbil_dyad_metadata.csv"
+}

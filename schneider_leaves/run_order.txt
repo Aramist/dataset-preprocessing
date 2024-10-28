@@ -1,0 +1,7 @@
+compute_tracks.py   <---|
+make_segments.py    <---| Any order
+filter_segments.py
+make_partial_datasets.py
+merge_datasets.py
+
+No arguments on any script, everything is in consts.json

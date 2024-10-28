@@ -1,0 +1,16 @@
+{
+    "recording_session_dir": "/mnt/home/rpeterson/ceph/ssl/footsteps_sound_localization",
+    "audio_sr": 192000,
+    "working_dir": "/mnt/home/atanelus/ceph/speaker_ssl/schneider_leaves",
+    "processed_track_dir": "processed_tracks",
+    "unprocessed_annotation_dir": "raw_annotations",
+    "processed_annotation_dir": "filtered_annotations",
+    "partial_dataset_dir": "/home/atanelus/footsteps_partial_datasets",
+    "corner_points_path": "/mnt/home/atanelus/dataset_corner_points/schneider_corner_points.npy",
+    "full_dataset_path": "/mnt/home/atanelus/ceph/datasets/footsteps_dataset.h5",
+    "full_metadata_path": "/mnt/home/atanelus/ceph/datasets/footsteps_metadata.csv",
+    "min_instance_len_ms": 25,
+    "max_instance_len_ms": 50,
+    "arena_corner_points_px": [[270, 70], [1215, 82], [1204, 1011], [263, 1007]],
+    "arena_dims_mm": [600, 600]
+}

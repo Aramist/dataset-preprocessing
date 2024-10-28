@@ -1,0 +1,9 @@
+{
+    "gdrive_path":"drive:Ralph-Bartul/2_mouse_data/20230119_172410/",
+    "download_path":"/mnt/home/atanelus/ceph/princeton_data/dyad_gdrive",
+    "full_dataset_path": "/mnt/home/atanelus/ceph/neurips_datasets/audio/dyadmouse-24m-e3_audio.h5",
+    "audio_sample_rate": 250000,
+    "audio_num_channels": 24,
+    "video_frame_rate": 150,
+    "date_format_for_saving": "%Y_%m_%d_%H_%M_%S"
+}

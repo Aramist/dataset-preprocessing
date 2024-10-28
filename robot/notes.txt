@@ -1,0 +1,9 @@
+Script order:
+1. extract_position.py
+  - Has hardcoded video paths so it can be run without arguments optionally.
+  - Generates video/video_paths.csv
+2. extract_bad_frames.py
+  - Requires video/video_paths.csv to exist
+3. extract_audio.py
+  - Requires durations.npy for stimulus durations
+  - 

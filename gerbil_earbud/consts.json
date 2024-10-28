@@ -1,0 +1,26 @@
+{
+    "working_dir": "/mnt/home/atanelus/ceph/speaker_ssl/earbud",
+    "recording_session_dir": "/mnt/home/atanelus/ceph/h5transfer/earbud/2023_06_29_15_56_56_960261_20230629_earbud_cohort2_vox",
+    "audio_sr": 125000,
+    "video_framerate": 30,
+    "processed_track_dir": "processed_tracks",
+    "processed_annotation_dir": "filtered_annotations",
+
+    "stim_durations_file": "durations.npy",
+    "vox_buffer_left_ms": 5,
+    "vox_buffer_right_ms": 5,
+    "min_duration_ms": 15,
+    "estimated_playback_delay_ms": 110,
+    "corner_points":[
+        [74, 80],
+        [582, 66],
+        [589, 395],
+        [93, 401]
+    ],
+    "corner_points_path": "/mnt/home/atanelus/dataset_corner_points/earbud_corner_points.npy",
+    
+    "arena_dims": [572.0, 360.0],
+
+    "full_dataset_path": "/mnt/home/atanelus/ceph/datasets/gerbilearbud-4m-e1_audio.h5",
+    "full_metadata_path": "/mnt/home/atanelus/ceph/datasets/gerbilearbud_metadata.csv"
+}

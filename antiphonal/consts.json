@@ -1,0 +1,32 @@
+{
+    "recording_session_dirs": [
+        "/mnt/home/rpeterson/ceph/ssl/gerbil/adolescents/antiphonal",
+        "/mnt/ceph/users/rpeterson/ssl/gerbil/adolescents/",
+        "/mnt/ceph/users/rpeterson/ssl/adolescents"
+    ],
+    "banned_words": [
+        "2023_09_05",
+        "2023_09_06",
+        "2023_09_12",
+        "2023_09_13",
+        "2023_10_26",
+        "2024_01_11",
+        "2024_01_26",
+        "2024_01_28",
+        "2024_02_14"
+    ],
+    "sleap_model_dir": "/mnt/home/atanelus/ceph/adolescent_sleap/models/230707_135001.single_instance",
+    "sleap_track_dir": "sleap_tracks",
+    "audio_sr": 125000,
+    "working_dir": "/mnt/home/atanelus/ceph/speaker_ssl/antiphonal",
+    "processed_track_dir": "processed_tracks",
+    "processed_annotation_dir": "filtered_annotations",
+    "partial_dataset_dir": "/home/atanelus/antiphonal_partial_datasets",
+    "corner_points_path": "/mnt/home/atanelus/dataset_corner_points/antiphonal_corner_points.npy",
+    "full_dataset_path": "/mnt/home/atanelus/ceph/datasets/solo_gerbil.h5",
+    "full_metadata_path": "/mnt/home/atanelus/ceph/datasets/solo_gerbil_metadata.csv",
+    "min_vox_len_ms": 10,
+    "max_vox_len_ms": 250,
+    "vox_buffer_left_ms": 5,
+    "vox_buffer_right_ms": 5
+}
