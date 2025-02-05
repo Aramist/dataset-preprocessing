@@ -38,9 +38,17 @@ def main():
     metadatas = []
     # Start merging
     with h5py.File(dset_path, "w") as ctx:
+        ctx.attrs["audio_sr"] = audio_sr
+        print(num_mics)
+        ctx.attrs["num_mics"] = num_mics
+        ctx.attrs["arena_dims"] = np.array([consts["arena_dims"]])
+
         ctx.create_dataset("audio", (full_dataset_length, num_mics), dtype=np.float32)
         ctx.create_dataset(
-            "locations", (len(full_dataset_lengths), 2), dtype=np.float32
+            "locations", (len(full_dataset_lengths), 2, 2), dtype=np.float32
+        )
+        ctx.create_dataset(
+            "locations_px", (len(full_dataset_lengths), 2, 2), dtype=np.float32
         )
         ctx.create_dataset(
             "length_idx",
@@ -48,6 +56,7 @@ def main():
             dtype=np.int64,
             data=np.cumsum([0] + full_dataset_lengths),
         )
+        ctx.create_dataset("node_names", (2,), data=[b"nose", b"head"])
 
         cur_audio_sample = 0
         cur_location_idx = 0
@@ -58,11 +67,15 @@ def main():
             with h5py.File(partial_dset_path, "r") as partial_ctx:
                 audio = partial_ctx["audio"][:]
                 locations = partial_ctx["locations"][:]
+                locations_px = partial_ctx["locations_px"][:]
 
                 ctx["audio"][cur_audio_sample : cur_audio_sample + len(audio)] = audio
                 ctx["locations"][
-                    cur_location_idx : cur_location_idx + len(locations), :
+                    cur_location_idx : cur_location_idx + len(locations), ...
                 ] = locations
+                ctx["locations_px"][
+                    cur_location_idx : cur_location_idx + len(locations), ...
+                ] = locations_px
 
                 cur_audio_sample += len(audio)
                 cur_location_idx += len(locations)

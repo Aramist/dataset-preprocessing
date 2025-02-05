@@ -7,7 +7,10 @@ import pandas as pd
 from tqdm import tqdm
 
 # Custom sort key because I might end up with data distributed across multiple folders
-path_date = lambda p: "_".join(p.stem.split("_")[1:7])
+# This gets the date component of the filename of an annotation (.csv) file excluding ms
+annotation_path_date = lambda p: "_".join(p.stem.split("_")[1:7])
+# This gets the date component of a non-annotation file (.h5 or .avi) excluding ms
+general_path_date = lambda p: "_".join(p.stem.split("_")[:6])
 
 with open("consts.json", "r") as ctx:
     consts = json.load(ctx)
@@ -20,49 +23,17 @@ vox_buffer_left_samples = int(consts["vox_buffer_left_ms"] * audio_sr // 1000)
 vox_buffer_right_samples = int(consts["vox_buffer_right_ms"] * audio_sr // 1000)
 
 working_dir = Path(consts["working_dir"])
-audio_paths = sum(
-    (
-        list(Path(search_dir).glob("*/*.h5"))
-        for search_dir in consts["recording_session_dirs"]
-    ),
-    start=[],
-)
-unprocessed_annotations_paths = sum(
-    (
-        list(Path(search_dir).glob("*/*.csv"))
-        for search_dir in consts["recording_session_dirs"]
-    ),
-    start=[],
-)
-unprocessed_annotations_paths.sort(key=path_date)
 processed_annotation_dir = working_dir / consts["processed_annotation_dir"]
-processed_annotation_dir.mkdir(parents=True, exist_ok=True)
-
-if not audio_paths:
-    raise FileNotFoundError(
-        "No audio files found in the provided recording session directory"
-    )
-if not unprocessed_annotations_paths:
-    raise FileNotFoundError(
-        "No annotation files found in the provided recording session directory"
-    )
 
 banned_words = consts["banned_words"]
 
 
-def process_annotation(annotation_path: Path):
-    date = path_date(annotation_path)
+def process_annotation(annotation_path: Path, onset_path: Path):
+    date = annotation_path_date(annotation_path)
 
     if any(banned_word in date for banned_word in banned_words):
         print(f"Skipping {date} due to banned word")
         return None
-
-    onset_path = list(filter(lambda x: date in x.name, audio_paths))
-    if not onset_path:
-        print(f"Could not find onset for {date}")
-        return None
-    else:
-        onset_path = onset_path[0]
 
     df = pd.read_csv(annotation_path).dropna()
 
@@ -110,12 +81,54 @@ def process_annotation(annotation_path: Path):
 
 
 if __name__ == "__main__":
+    processed_annotation_dir.mkdir(parents=True, exist_ok=True)
+    audio_paths = sum(
+        (
+            list(Path(search_dir).glob("*/*.h5"))
+            for search_dir in consts["recording_session_dirs"]
+        ),
+        start=[],
+    )
+    unprocessed_annotations_paths = sum(
+        (
+            list(Path(search_dir).glob("*/*.csv"))
+            for search_dir in consts["recording_session_dirs"]
+        ),
+        start=[],
+    )
+    unprocessed_annotations_paths.sort(key=annotation_path_date)
+
+    if not audio_paths:
+        raise FileNotFoundError(
+            "No audio files found in the provided recording session directory"
+        )
+    if not unprocessed_annotations_paths:
+        raise FileNotFoundError(
+            "No annotation files found in the provided recording session directory"
+        )
+
     total_num_instances = 0
+    num_files_accepted = 0
     for annotation in tqdm(unprocessed_annotations_paths):
-        new_segments = process_annotation(annotation)
+        onset_path = next(
+            filter(
+                lambda p: general_path_date(p.parent)
+                == annotation_path_date(annotation),
+                audio_paths,
+            ),
+            None,
+        )
+        if onset_path is None:
+            print(f"Failed to find audio file for annotation {annotation.name}")
+            continue
+        new_segments = process_annotation(annotation, onset_path)
         if new_segments is None:
             continue
         total_num_instances += len(new_segments)
+        num_files_accepted += 1
         new_file_name = annotation.with_suffix(".npy").name
         new_path = processed_annotation_dir / new_file_name
         np.save(new_path, new_segments)
+
+    print(f"Total number of instances: {total_num_instances}")
+    print(f"Number of files accepted: {num_files_accepted}")

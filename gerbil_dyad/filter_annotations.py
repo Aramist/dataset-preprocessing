@@ -15,6 +15,9 @@ annotation_path_date = lambda p: "_".join(
 with open("consts.json", "r") as ctx:
     consts = json.load(ctx)
 
+partial_dataset_dir = Path(consts["partial_dataset_dir"])
+full_metadata_path = Path(consts["full_metadata_path"])
+
 audio_sr = consts["audio_sr"]
 video_framerate = consts["video_framerate"]
 min_vox_len_sec = consts["min_vox_len_ms"] / 1000
@@ -99,8 +102,8 @@ def process_annotation(annotation_path):
 
     powers = get_powers(onset_path, segments_samps)
 
-    power_thresh = 2e-4
-    good_vocalizations = powers.mean(axis=-1) > power_thresh
+    power_thresh = 1e-4
+    good_vocalizations = powers.max(axis=-1) > power_thresh
 
     segments_samps = segments_samps[good_vocalizations, :]
 
@@ -144,6 +147,7 @@ if __name__ == "__main__":
     video_frames = []
 
     processed_annotation_dir.mkdir(exist_ok=True)
+    partial_dataset_dir.mkdir(exist_ok=True)
     for annotation in annotations_paths:
         new_segments = process_annotation(annotation)
         if new_segments is None:
@@ -158,6 +162,17 @@ if __name__ == "__main__":
 
         video_fnames.extend([vid_fpath] * len(vid_frames))
         video_frames.extend(vid_frames)
+
+        partial_metadata = pd.DataFrame(
+            {
+                "video_path": [vid_fpath] * len(vid_frames),
+                "frame_idx": vid_frames,
+            }
+        )
+        partial_metadata_path = partial_dataset_dir / (
+            Path(annotation).stem + "_metadata.csv"
+        )
+        partial_metadata.to_csv(partial_metadata_path, index=False)
     if not video_fnames:
         raise ValueError("No video frames found!")
     # Save the video frame index dataframe
@@ -168,4 +183,4 @@ if __name__ == "__main__":
             "annotation": [video_label(p) for p in video_fnames],
         }
     )
-    df.to_csv("/mnt/home/atanelus/ceph/datasets/dyad_metadata.csv", index=False)
+    # df.to_csv(full_metadata_path, index=False)

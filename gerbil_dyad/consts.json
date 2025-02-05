@@ -20,6 +20,7 @@
     "max_vox_len_ms": 250,
     "vox_buffer_left_ms": 5,
     "vox_buffer_right_ms": 5,
+    "partial_dataset_dir": "/home/atanelus/partial_gerbil_dyad",
     "full_dataset_path": "/mnt/home/atanelus/ceph/datasets/gerbil_dyad.h5",
     "full_metadata_path": "/mnt/home/atanelus/ceph/datasets/gerbil_dyad_metadata.csv"
 }

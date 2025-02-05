@@ -132,14 +132,9 @@ def get_tracks_from_h5(h5_file: Path):
         # shape is (coords, nodes, time)
         tracks = tracks.transpose(2, 1, 0)
         # shape is (time, nodes, coords)
+        node_names = ctx["node_names"][:]
 
-    tracks = np.where(
-        np.isnan(tracks[:, 0, :]).any(axis=1, keepdims=True),
-        tracks[:, 1, :],
-        tracks[:, 0, :],
-    )
-
-    return tracks
+    return tracks, node_names
 
 
 if __name__ == "__main__":

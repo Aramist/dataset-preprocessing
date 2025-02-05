@@ -5,7 +5,7 @@ from pathlib import Path
 def make_sleap_command(vid_file_path: Path, sleap_model_path: Path, output_path: Path):
     track_command = (
         "sleap-track "
-        f"--model {sleap_model_path} "
+        f'--model "{sleap_model_path}" '
         f"--output {output_path} "
         "--gpu auto "
         f"{vid_file_path}"
@@ -24,7 +24,7 @@ def make_sleap_command(vid_file_path: Path, sleap_model_path: Path, output_path:
 
 def wrap_command_environment(cmd: str, log_path=None):
     # Wrap the command in a script that sets the environment
-    cmd = f'source /mnt/home/atanelus/.bashrc; eval "$(/mnt/home/atanelus/miniconda3/bin/conda shell.bash hook)"; conda activate sleap; module purge; module load modules/2.0-20220630; module load cuda/11.4.4; module load cudnn; {cmd}'
+    cmd = f'source /mnt/home/atanelus/.bashrc; eval "$(/mnt/home/atanelus/miniconda3/bin/conda shell.bash hook)"; conda activate sleap; {cmd}'
     if log_path is not None:
         cmd = f"( {cmd} ) &> {log_path}"
     return cmd
@@ -33,13 +33,17 @@ def wrap_command_environment(cmd: str, log_path=None):
 def main():
     with open("consts.json", "r") as ctx:
         consts = json.load(ctx)
-    data_dir = Path(consts["recording_session_dir"])
+    data_dirs = map(Path, consts["video_alias_dirs"])
 
-    avi_files = data_dir.glob("*/*.avi")
+    avi_files = []
+    for data_dir in data_dirs:
+        avi_files.extend(data_dir.glob("*.avi"))
+        avi_files.extend(data_dir.glob("*.mp4"))
 
     # attempt to run sleap
     working_dir = Path(consts["working_dir"])
-    sleap_path = Path(consts["sleap_model_dir"])
+    trained_model_paths = list(map(Path, consts["sleap_model_dirs"]))
+    path_for_model_idxs = consts["model_for_video"]
     track_dir = working_dir / consts["sleap_track_dir"]
     track_dir.mkdir(exist_ok=True, parents=True)
 
@@ -47,9 +51,17 @@ def main():
     log_dir.mkdir(exist_ok=True, parents=True)
 
     for avi_file in sorted(avi_files):
-        output_path = track_dir / (avi_file.parent.name + ".tracks.h5.slp")
-        log_path = log_dir / (avi_file.parent.stem + ".log")
-        cmd = make_sleap_command(avi_file, sleap_path, output_path)
+        fdate = "_".join(avi_file.stem.split("_")[:7])
+        new_name = fdate + ".tracks.h5.slp"
+        output_path = track_dir / new_name
+        log_path = log_dir / (fdate + ".log")
+        model_path_idx = path_for_model_idxs.get(avi_file.name, 0)
+        model_path = trained_model_paths[model_path_idx]
+
+        if output_path.exists():
+            continue
+
+        cmd = make_sleap_command(avi_file, model_path, output_path)
         if not cmd:
             continue
         cmd = wrap_command_environment(cmd, log_path)

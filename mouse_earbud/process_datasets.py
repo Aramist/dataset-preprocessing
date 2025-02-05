@@ -85,7 +85,9 @@ def make_partial_dataset(session_dir: Path, skip_if_exists: bool = True) -> np.n
         print(f"File already exists at {output_path}")
         return
 
-    loc_file = next(session_dir.glob("*.h5"), None)
+    loc_file = next(
+        filter(lambda p: "speaker" not in p.stem, session_dir.glob("*.h5")), None
+    )
     seg_file = next(session_dir.glob("*.txt"), None)
     audio_file = next(session_dir.glob("*.mmap"), None)
     if loc_file is None or seg_file is None or audio_file is None:
@@ -109,23 +111,26 @@ def make_partial_dataset(session_dir: Path, skip_if_exists: bool = True) -> np.n
         return
     true_start_point = int(true_start_point * AUDIO_SAMPLE_RATE)
 
-    durations = np.loadtxt(seg_file, dtype=np.int32).reshape(-1)
     # durations has format [delay_length, stim_duration, delay_length, stim_duration, ...]
+    durations = np.loadtxt(seg_file, dtype=np.int32).reshape(-1)[1:-1]
+    durations = np.insert(durations, 0, 0)
+    # Now looks like [0, stim, delay, stim, delay, stim, ...]
+    cum_index = np.cumsum(durations)
+    # Now looks like [0, stim1_end, stim2_start, stim_2_end, stim3_start, ...]
     # Reformat to onset and offset indices
-    cum_index = np.cumsum(np.insert(durations, 0, 0))
-    stim_indices = np.arange(len(durations))[1::2]
+    cum_index = cum_index.reshape(-1, 2)
+    cum_index += true_start_point
+    # In case the playbacks extend beyond the end of the audio file:
+    cum_index = cum_index[
+        cum_index[:, 1] < num_samples_in_file - AUDIO_SAMPLE_RATE * 5, :
+    ]
 
     ############################
     # for debugging, remove later
     # stim_indices = stim_indices[:100]
     ############################
 
-    onset_indices = cum_index[stim_indices]
-    offset_indices = cum_index[stim_indices + 1]
-    # Account for the estimated start point
-    shift = true_start_point - onset_indices[0]
-    onset_indices += shift
-    offset_indices += shift
+    onset_indices, offset_indices = cum_index.T
 
     # Load the locations
     video_path = next(session_dir.glob("*.mp4"), None)
@@ -158,4 +163,4 @@ if __name__ == "__main__":
     sessions = list(sessions)
     sessions.sort()
     for session in tqdm(sessions):
-        make_partial_dataset(session, skip_if_exists=False)
+        make_partial_dataset(session, skip_if_exists=True)
